@@ -14,6 +14,6 @@ namespace Bangazon_Workforce_Management.Models
         public int ComputerId { get; set; }
         public Employee Employee { get; set; }
         public Computer Computer { get; set; }
-
+        
     }
 }
