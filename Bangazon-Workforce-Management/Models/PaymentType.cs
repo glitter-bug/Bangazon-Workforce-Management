@@ -10,7 +10,7 @@ namespace Bangazon_Workforce_Management.Models
     {
         public int Id { get; set; }
         [Required]
-        public int AcctNumber { get; set; }
+        public string AcctNumber { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]
