@@ -15,6 +15,20 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\ViewModels\" />
+    <Folder Include="Views\Products\" />
+    <Folder Include="Views\PaymentTypes\" />
+    <Folder Include="Views\Employees\" />
+    <Folder Include="Views\Customers\" />
+    <Folder Include="Views\ComputerEmployees\" />
+    <Folder Include="Views\ProductTypes\" />
+    <Folder Include="Views\Departments\" />
+    <Folder Include="Views\Computers\" />
+    <Folder Include="Views\TrainingPrograms\" />
   </ItemGroup>
 
 </Project>
