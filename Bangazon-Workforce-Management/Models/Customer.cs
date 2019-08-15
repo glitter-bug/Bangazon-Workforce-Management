@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Bangazon_Workforce_Management.Models
@@ -12,6 +13,10 @@ namespace Bangazon_Workforce_Management.Models
 
         [Required]
         public string LastName { get; set; }
+
+        public DateTime CreationDate { get; set; }
+
+        public DateTime LastActiveTime { get; set; }
 
         public List<PaymentType> PaymentTypes { get; set; } = new List<PaymentType>();
 
