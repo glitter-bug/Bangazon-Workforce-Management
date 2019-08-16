@@ -36,7 +36,8 @@ namespace Bangazon_Workforce_Management.Controllers
                 {
                     cmd.CommandText = @"
                         SELECT  Id, Name, StartDate, EndDate,MaxAttendees
-                        FROM TrainingProgram   
+                        FROM TrainingProgram  
+                        WHERE CURRENT_TIMESTAMP > EndDate
                     ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
