@@ -27,7 +27,10 @@
             <th>
                 @Html.DisplayNameFor(model => model.Manufacturer)
             </th>
-            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeId)
+
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -47,6 +50,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Manufacturer)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EmployeeId)
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |

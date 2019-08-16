@@ -39,8 +39,10 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer
-                        FROM Computer
+                        SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, ce.EmployeeId, e.FullName
+                        FROM Computer c
+                        LEFT JOIN ComputerEmployee ce ON ce.ComputerId = c.Id
+                        LEFT JOIN Employee e ON e.Id = ce.EmployeeId
                         ORDER BY Id
                     ";
 
@@ -53,7 +55,7 @@ namespace Bangazon_Workforce_Management.Controllers
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
                         };
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
@@ -62,6 +64,21 @@ namespace Bangazon_Workforce_Management.Controllers
                         else
                         {
                             computer.DecomissionDate = null;
+                        };
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                        {
+                            //Employee employee = new Employee
+                            //{
+                            //    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            //    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            //    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            //    DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                            //};
+                            computer.EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+                        }
+                        else
+                        {
+                            computer.EmployeeId = null;
                         };
                         computers.Add(computer);
                     }
@@ -160,15 +177,23 @@ namespace Bangazon_Workforce_Management.Controllers
                                 @manufacturer
                             );
 
-                            SELECT FIRST Id, PurchaseDate, DecomissionDate, Make, Manufacturer FROM Computer ORDER BY Id DESC;
-
-                            
+                            INSERT INTO ComputerEmployee (
+                                ComputerId,
+                                EmployeeId,
+                                AssignDate
+                            ) VALUES (
+                                (SELECT MAX(Id) FROM Computer),
+                                @employeeId,
+                                @assignDate
+                            )                           
                         ";
 
                         cmd.Parameters.AddWithValue("@purchaseDate", computer.PurchaseDate);
                         cmd.Parameters.AddWithValue("@decomissionDate", computer.DecomissionDate);
                         cmd.Parameters.AddWithValue("@make", computer.Make);
                         cmd.Parameters.AddWithValue("@manufacturer", computer.Manufacturer);
+                        cmd.Parameters.AddWithValue("@employeeId", computer.EmployeeId);
+                        cmd.Parameters.AddWithValue("@assignDate", DateTime.Now);
 
                         cmd.ExecuteNonQuery();
                     }
@@ -181,29 +206,6 @@ namespace Bangazon_Workforce_Management.Controllers
                 return View();
             }
         }
-
-        //// GET: Computers/Edit/5
-        //public ActionResult Edit(int id)
-        //{
-        //    return View();
-        //}
-
-        //// POST: Computers/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        // TODO: Add update logic here
-
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
 
         //// GET: Computers/Delete/5
         //public ActionResult Delete(int id)
