@@ -16,7 +16,7 @@ namespace Bangazon_Workforce_Management.Models
         [Required]
         public int DepartmentId { get; set; }
         [Required]
-        public bool IsSupervisor { get; set; }
+        public bool IsSuperVisor { get; set; }
 
         public Department Department { get; set; }
         public Computer Computer { get; set; }
