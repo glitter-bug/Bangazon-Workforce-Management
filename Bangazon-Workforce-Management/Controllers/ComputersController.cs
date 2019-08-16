@@ -39,7 +39,7 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, ce.EmployeeId, e.FullName
+                        SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, ce.EmployeeId AS CEEmployeeId, e.Id AS EmployeeId, e.FirstName, e.LastName, e.DepartmentId
                         FROM Computer c
                         LEFT JOIN ComputerEmployee ce ON ce.ComputerId = c.Id
                         LEFT JOIN Employee e ON e.Id = ce.EmployeeId
@@ -67,18 +67,19 @@ namespace Bangazon_Workforce_Management.Controllers
                         };
                         if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
                         {
-                            //Employee employee = new Employee
-                            //{
-                            //    Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            //    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            //    LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            //    DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
-                            //};
-                            computer.EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+                            Employee employee = new Employee
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                            };
+                            computer.Employee = employee;
+                            //computer.EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
                         }
                         else
                         {
-                            computer.EmployeeId = null;
+                            computer.Employee = null;
                         };
                         computers.Add(computer);
                     }

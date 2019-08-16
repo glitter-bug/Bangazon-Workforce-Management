@@ -18,5 +18,7 @@ namespace Bangazon_Workforce_Management.Models
         public string Manufacturer { get; set; }
 
         public int? EmployeeId { get; set; }
+
+        public Employee Employee { get; set; }
     }
 }
