@@ -148,7 +148,7 @@ namespace Bangazon_Workforce_Management.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-                            INSERT INTO Computer (
+                             INSERT INTO Computer (
                                 PurchaseDate, 
                                 DecomissionDate, 
                                 Make,
