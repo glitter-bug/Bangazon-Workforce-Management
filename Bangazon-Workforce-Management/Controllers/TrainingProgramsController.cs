@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Bangazon_Workforce_Management.Models;
-using Bangazon_Workforce_Management.Models.ViewModels;
+
 
 namespace Bangazon_Workforce_Management.Controllers
 {
@@ -37,7 +37,7 @@ namespace Bangazon_Workforce_Management.Controllers
                     cmd.CommandText = @"
                         SELECT  Id, Name, StartDate, EndDate,MaxAttendees
                         FROM TrainingProgram  
-                        WHERE CURRENT_TIMESTAMP > EndDate
+                        WHERE CURRENT_TIMESTAMP < StartDate
                     ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -98,8 +98,8 @@ namespace Bangazon_Workforce_Management.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            var viewModel = new TrainingProgramCreateViewModel(_config.GetConnectionString("DefaultConnection"));
-            return View(viewModel);
+            
+            return View();
         }
 
         // POST: TrainingPrograms/Create
@@ -146,22 +146,7 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
-        // POST: TrainingPrograms/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add insert logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        
 
         // GET: TrainingPrograms/Edit/5
         public ActionResult Edit(int id)
