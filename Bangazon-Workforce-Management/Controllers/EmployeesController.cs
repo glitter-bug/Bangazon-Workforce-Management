@@ -4,8 +4,10 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Bangazon_Workforce_Management.Models;
+using Bangazon_Workforce_Management.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 
 namespace Bangazon_Workforce_Management.Controllers
@@ -111,17 +113,59 @@ namespace Bangazon_Workforce_Management.Controllers
         // GET: Employees/Create
         public ActionResult Create()
         {
-            return View();
+            var viewModel = new EmployeeCreateViewModel();
+            var departments = GetAllDepartments();
+            var selectItems = departments
+           .Select(department => new SelectListItem
+           {
+               Text = department.Name,
+               Value = department.Id.ToString()
+
+           })
+           .ToList();
+            selectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose Department...",
+                Value = "0"
+            });
+            viewModel.Departments = selectItems;
+            return View(viewModel);
         }
 
-        // POST: Employees/Create
+        // POST: Studenst/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Employee employee)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO Student (
+                                FirstName, 
+                                LastName, 
+                                IsSuperVisor, 
+                                DepartmentId
+                            ) VALUES (
+                                @firstName,
+                                @lastName,
+                                @isSuperVisor,
+                                @departmentId
+                            )
+                        ";
+
+                        cmd.Parameters.AddWithValue("@firstName", employee.FirstName);
+                        cmd.Parameters.AddWithValue("@lastName", employee.LastName);
+                        cmd.Parameters.AddWithValue("@slackHandle", employee.IsSuperVisor);
+                        cmd.Parameters.AddWithValue("@departmentId", employee.DepartmentId);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -129,12 +173,6 @@ namespace Bangazon_Workforce_Management.Controllers
             {
                 return View();
             }
-        }
-
-        // GET: Employees/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
         }
 
         // POST: Employees/Edit/5
@@ -174,6 +212,32 @@ namespace Bangazon_Workforce_Management.Controllers
             catch
             {
                 return View();
+            }
+        }
+        private List<Department> GetAllDepartments()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, Name FROM Department";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Department> departments = new List<Department>();
+                    while (reader.Read())
+                    {
+                        departments.Add(new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                        });
+                    }
+
+                    reader.Close();
+
+                    return departments;
+                }
             }
         }
     }
