@@ -11,13 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\ViewModels\" />
     <Folder Include="Views\Products\" />
     <Folder Include="Views\PaymentTypes\" />
     <Folder Include="Views\Employees\" />
     <Folder Include="Views\Customers\" />
     <Folder Include="Views\ComputerEmployees\" />
     <Folder Include="Views\ProductTypes\" />
+    <Folder Include="Views\Departments\" />
     <Folder Include="Views\Computers\" />
     <Folder Include="Views\TrainingPrograms\" />
   </ItemGroup>
