@@ -19,7 +19,6 @@
     <Folder Include="Views\ProductTypes\" />
     <Folder Include="Views\Departments\" />
     <Folder Include="Views\Computers\" />
-    <Folder Include="Views\TrainingPrograms\" />
   </ItemGroup>
 
 </Project>
