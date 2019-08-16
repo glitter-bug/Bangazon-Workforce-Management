@@ -59,10 +59,39 @@ namespace Bangazon_Workforce_Management.Controllers
             return View(departments);
         }
         // GET: Departments/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
+        //public ActionResult Details(int id)
+        //{
+        //    Department department = null;
+        //    using (SqlConnection conn = Connection)
+        //    {
+        //        conn.Open();
+        //        using (SqlCommand cmd = conn.CreateCommand())
+        //        {
+        //            cmd.CommandText = @"
+        //                SELECT d.Id as DepartmentId, d.Name, d.Budget,
+        //                        LIST(e.Id) as ListOfEmployees
+        //                        FROM Department d
+        //                        LEFT JOIN Employee e ON d.ID = e.DepartmentId
+        //                GROUP BY d.Id, d.Name, d.Budget
+        //                         WHERE ID = @id
+        //            ";
+        //            cmd.Parameters.Add(new SqlParameter("@id", id));
+        //            SqlDataReader reader = cmd.ExecuteReader();
+        //            if (reader.Read())
+        //            {
+        //                department = new Department()
+        //                {
+        //                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+        //                    Name = reader.GetString(reader.GetOrdinal("Name")),
+        //                    Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+        //                    ListOfEmployees = reader.GetString(reader.GetOrdinal("ListOfEmployees"))
+        //                };
+        //            }
+        //        }
+        //    }
+        //    return View(department);
+        //}
+
 
         // GET: Departments/Create
         public ActionResult Create()
@@ -73,12 +102,28 @@ namespace Bangazon_Workforce_Management.Controllers
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Department department)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO Department (
+                                Name, Budget
+                            ) VALUES (
+                                @Name, @Budget
+                            )
+                        ";
+                        cmd.Parameters.AddWithValue("@Name", department.Name);
+                        cmd.Parameters.AddWithValue("@Language", department.Budget);
 
+                        cmd.ExecuteNonQuery();
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -86,6 +131,7 @@ namespace Bangazon_Workforce_Management.Controllers
                 return View();
             }
         }
+
 
         // GET: Departments/Edit/5
         public ActionResult Edit(int id)

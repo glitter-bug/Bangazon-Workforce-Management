@@ -16,6 +16,9 @@ namespace Bangazon_Workforce_Management.Models
         [Display(Name ="Number Of Employees")]
         public int NumberOfEmployees { get; set; }
 
+        //[Display(Name="List Of Employees")]
+        //public string ListOfEmployees { get; set; }
+
         public List<Employee> Employees { get; set; } = new List<Employee>();
     }
 }
