@@ -243,7 +243,7 @@ namespace Bangazon_Workforce_Management.Controllers
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"))
+                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"))
                         });
                     }
 
