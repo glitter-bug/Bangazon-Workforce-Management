@@ -64,7 +64,7 @@ namespace Bangazon_Workforce_Management.Controllers
         }
 
         // GET: Employees/Details/5
-        public ActionResult Details(int id, Computer computer, Department department, TrainingProgram trainingProgram)
+        public ActionResult Details(int id)
         {
             Employee employee = null;
             using (SqlConnection conn = Connection)
@@ -73,38 +73,51 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                       SELECT e.FirstName, e.LastName, d.Name AS DepartmentName, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer, tp.Name AS TrainingProgram
+                     SELECT e.FirstName, e.LastName, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
+                        tp.[Name] AS TrainingProgram, tp.StartDate, tp.EndDate, tp.MaxAttendees, d.Budget
                     FROM Department d 
-                    JOIN Employee e ON d.Id = e.DepartmentId
-                    JOIN Computer c ON e.Id = c.Id
-                    JOIN TrainingProgram tp ON c.Id = tp.Id
+                    LEFT JOIN Employee e ON d.Id = e.DepartmentId
+                    LEFT JOIN Computer c ON e.Id = c.Id
+                    LEFT JOIN TrainingProgram tp ON c.Id = tp.Id
                     WHERE e.Id = @id
                     ";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         employee = new Employee()
                         {
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                         };
-                        computer = new Computer()
+
+                        employee.Computer = new Computer();
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerMake")))
                         {
-                            Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer")),
+                            employee.Computer.Make = reader.GetString(reader.GetOrdinal("ComputerMake"));
+                            employee.Computer.Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"));
+                            employee.Computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
                         };
-                        department = new Department()
+
+                        employee.Department = new Department()
                         {
                             Name = reader.GetString(reader.GetOrdinal("DepartmentName")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+
                         };
-                        trainingProgram = new TrainingProgram()
+                        var trainingProgram = new TrainingProgram();
+                        if (!reader.IsDBNull(reader.GetOrdinal("StartDate")))
                         {
-                            Name = reader.GetString(reader.GetOrdinal("TrainingProgram")),
-                        };
-                    }
-                }
+
+                            trainingProgram.Name = reader.GetString(reader.GetOrdinal("TrainingProgram"));
+                            trainingProgram.StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate"));
+                            trainingProgram.EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"));
+                            trainingProgram.MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"));
+                        }
+                        employee.TrainingPrograms.Add(trainingProgram);
+                    };
+                };
             }
 
             return View(employee);
@@ -145,7 +158,7 @@ namespace Bangazon_Workforce_Management.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-                            INSERT INTO Student (
+                            INSERT INTO Employee (
                                 FirstName, 
                                 LastName, 
                                 IsSuperVisor, 
@@ -160,7 +173,7 @@ namespace Bangazon_Workforce_Management.Controllers
 
                         cmd.Parameters.AddWithValue("@firstName", employee.FirstName);
                         cmd.Parameters.AddWithValue("@lastName", employee.LastName);
-                        cmd.Parameters.AddWithValue("@slackHandle", employee.IsSuperVisor);
+                        cmd.Parameters.AddWithValue("@isSuperVisor", employee.IsSuperVisor);
                         cmd.Parameters.AddWithValue("@departmentId", employee.DepartmentId);
 
                         cmd.ExecuteNonQuery();

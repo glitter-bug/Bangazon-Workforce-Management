@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Bangazon-Workforce-Management.Models.ViewModels
+namespace Bangazon_Workforce_Management.Models.ViewModels
 {
     public class EmployeeEditViewModel
 {

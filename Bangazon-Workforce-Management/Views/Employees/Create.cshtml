@@ -23,15 +23,13 @@
                 <span asp-validation-for="Employee.LastName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Employee.IsSuperVisor" /> @Html.DisplayNameFor(model => model.Employee.IsSuperVisor)
-                    </label>
-                </div>
+                <label asp-for="Employee.IsSuperVisor" class="control-label"></label>
+                <input asp-for="Employee.IsSuperVisor" class="form-control" />
+                <span asp-validation-for="Employee.IsSuperVisor" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Departments" class="control-label"></label>
-                <select asp-for="Employee.Department" asp-items="@Model.Departments"></select>
+                <select asp-for="Employee.DepartmentId" asp-items="@Model.Departments"></select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />

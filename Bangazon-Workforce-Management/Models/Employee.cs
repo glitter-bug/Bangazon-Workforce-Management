@@ -17,8 +17,8 @@ namespace Bangazon_Workforce_Management.Models
         public int DepartmentId { get; set; }
         [Required]
         public bool IsSuperVisor { get; set; }
-
         public Department Department { get; set; }
         public Computer Computer { get; set; }
+        public List<TrainingProgram> TrainingPrograms { get; set; } = new List<TrainingProgram>();
     }
 }
