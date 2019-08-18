@@ -208,28 +208,42 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
-        //// GET: Computers/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
+        // GET: Computers/Delete/5
+        public ActionResult Delete(int id)
+        {
+            var computer = GetOneComputer(id);
+            return View(computer);
+        }
 
-        //// POST: Computers/Delete/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Delete(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        // TODO: Add delete logic here
+        // POST: Computers/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, IFormCollection collection)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
 
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM ComputerEmployee
+                                            WHERE ComputerId = @id;
+
+                                            DELETE FROM Computer
+                                            WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
 
         private List<Employee> GetAllEmployees()
         {
@@ -257,6 +271,32 @@ namespace Bangazon_Workforce_Management.Controllers
                     reader.Close();
 
                     return employees;
+                }
+            }
+        }
+
+        private Computer GetOneComputer(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, Make, Manufacturer, PurchaseDate, DecomissionDate FROM Computer WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Computer computer = new Computer();
+                    if (reader.Read())
+                    {
+                        computer.Id = reader.GetInt32(reader.GetOrdinal("Id"));
+                        computer.Make = reader.GetString(reader.GetOrdinal("Make"));
+                        computer.Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"));
+                        computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
+                        computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                    };
+                    reader.Close();
+                    return computer;
                 }
             }
         }
