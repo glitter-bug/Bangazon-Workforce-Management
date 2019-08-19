@@ -21,7 +21,7 @@ namespace Bangazon_Workforce_Management.Models
         [Required]
         public int MaxAttendees { get; set; }
 
-        public List<Employee> Attendees { get; set; }
-
+        public List<Employee> Attendees { get; set; } = new List<Employee>();
+       
     }
 }
