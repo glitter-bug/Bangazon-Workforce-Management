@@ -297,7 +297,7 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT tp.Name AS [Name], tp.StartDate AS StartDate, tp.EndDate AS StartDate, e.Id, tp.Id AS Id, tp.MaxAttendees AS MaxAttendees 
+                    cmd.CommandText = @"SELECT tp.Name AS [Name], tp.StartDate AS StartDate, tp.EndDate AS EndDate, e.Id, tp.Id AS Id, tp.MaxAttendees AS MaxAttendees 
                                         FROM Employee e 
                                         JOIN EmployeeTraining et ON e.Id = et.EmployeeId 
                                         JOIN TrainingProgram tp ON et.TrainingProgramId = tp.Id 
@@ -310,8 +310,8 @@ namespace Bangazon_Workforce_Management.Controllers
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
-                        
-                            trainingPrograms.Add(new TrainingProgram
+
+                        trainingPrograms.Add(new TrainingProgram
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                 Name = reader.GetString(reader.GetOrdinal("Name")),

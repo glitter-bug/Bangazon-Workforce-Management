@@ -8,9 +8,9 @@ namespace Bangazon_Workforce_Management.Models.ViewModels
 {
     public class TrainingAssignViewModel
     {
-        public Employee EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
 
-        public TrainingProgram TrainingProgramId { get; set; }
+        public int TrainingProgramId { get; set; }
 
         public List<SelectListItem> TrainingPrograms { get; set; }
     
