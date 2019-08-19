@@ -22,9 +22,18 @@ namespace Bangazon_Workforce_Management.Models
         public Computer Computer { get; set; }
         public List<TrainingProgram> TrainingPrograms { get; set; } = new List<TrainingProgram>();
 
+<<<<<<< HEAD
         public static implicit operator Employee(int v)
         {
             throw new NotImplementedException();
+=======
+        public string FullName
+        {
+            get
+            {
+                return $"{FirstName} {LastName}";
+            }
+>>>>>>> master
         }
     }
 }
