@@ -1,4 +1,4 @@
-﻿@model Bangazon_Workforce_Management.Models.Employee
+﻿@model Bangazon_Workforce_Management.Models.EmployeeTraining
 
 @{
     ViewData["Title"] = "Assign";
@@ -6,7 +6,7 @@
 
 <h2>Assign</h2>
 
-<h4>Employee</h4>
+<h4>EmployeeTraining</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -18,26 +18,14 @@
                 <span asp-validation-for="Id" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+                <label asp-for="EmployeeId" class="control-label"></label>
+                <input asp-for="EmployeeId" class="form-control" />
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DepartmentId" class="control-label"></label>
-                <input asp-for="DepartmentId" class="form-control" />
-                <span asp-validation-for="DepartmentId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="IsSuperVisor" /> @Html.DisplayNameFor(model => model.IsSuperVisor)
-                    </label>
-                </div>
+                <label asp-for="TrainingProgramId" class="control-label"></label>
+                <input asp-for="TrainingProgramId" class="form-control" />
+                <span asp-validation-for="TrainingProgramId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />

@@ -229,7 +229,7 @@ namespace Bangazon_Workforce_Management.Controllers
         }
 
         // GET: Employee/Assign/2
-        public async Task<ActionResult> Assign(int id)
+        public ActionResult Assign(int id)
         {
             var viewModel = new TrainingAssignViewModel();
             viewModel.TrainingPrograms = CreateTrainingSelections(GetEligibleTrainingPrograms(id));
@@ -247,11 +247,11 @@ namespace Bangazon_Workforce_Management.Controllers
         // POST: Employee/Assign/2
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Assign(int id, EmployeeTraining assign)
+        public IActionResult Assign(int id, EmployeeTraining assign)
         {
             using (SqlConnection conn = Connection)
             {
-                await conn.OpenAsync();
+                conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
@@ -313,11 +313,11 @@ namespace Bangazon_Workforce_Management.Controllers
                         
                             trainingPrograms.Add(new TrainingProgram
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("tp.Id")),
-                                Name = reader.GetString(reader.GetOrdinal("tp.Name")),
-                                StartDate = reader.GetDateTime(reader.GetOrdinal("tp.StartDate")),
-                                EndDate = reader.GetDateTime(reader.GetOrdinal("tp.EndDate")),
-                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("tp.MaxAttendees"))
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
 
                             });
                         
