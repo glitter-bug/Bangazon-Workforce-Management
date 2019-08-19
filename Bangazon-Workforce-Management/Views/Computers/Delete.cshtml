@@ -23,12 +23,15 @@
         <dd>
             @Html.DisplayFor(model => model.PurchaseDate)
         </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.DecomissionDate)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.DecomissionDate)
-        </dd>
+        @if (Model.DecomissionDate != null)
+        {
+            <dt>
+                @Html.DisplayNameFor(model => model.DecomissionDate)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.DecomissionDate)
+            </dd>
+        }
         <dt>
             @Html.DisplayNameFor(model => model.Make)
         </dt>
@@ -42,10 +45,16 @@
             @Html.DisplayFor(model => model.Manufacturer)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.EmployeeId)
+            Assigned Employee:
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.EmployeeId)
+            @Html.DisplayFor(model => model.Employee.FullName)
+        </dd>
+        <dt>
+            Assigned Employee Id:
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Employee.Id)
         </dd>
     </dl>
     
