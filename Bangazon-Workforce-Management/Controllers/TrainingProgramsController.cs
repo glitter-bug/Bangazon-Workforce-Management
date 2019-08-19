@@ -12,7 +12,6 @@ namespace Bangazon_Workforce_Management.Controllers
     {
 
         private readonly IConfiguration _config;
-        private string include;
 
         public TrainingProgramsController(IConfiguration config)
         {
@@ -37,9 +36,9 @@ namespace Bangazon_Workforce_Management.Controllers
                 {
                     cmd.CommandText = @"
                         SELECT  Id, Name, StartDate, EndDate,MaxAttendees
-                        FROM TrainingProgram  
+                        FROM TrainingProgram 
                         WHERE CURRENT_TIMESTAMP < StartDate
-
+                         
                         
                     ";
 
@@ -243,9 +242,9 @@ namespace Bangazon_Workforce_Management.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE FROM TrainingProgram
-                                                WHERE Id = @id;
-                                            DELETE FROM Employee
+                        cmd.CommandText = @"DELETE FROM EmployeeTraining
+                                                WHERE TrainingProgramId = @id;
+                                            DELETE FROM TrainingProgram
                                                 WHERE Id = @id";
                         cmd.Parameters.AddWithValue("@id", id);
 
