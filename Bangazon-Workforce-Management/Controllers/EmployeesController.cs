@@ -233,13 +233,16 @@ namespace Bangazon_Workforce_Management.Controllers
         public ActionResult Assign(int id)
         {
             var viewModel = new TrainingAssignViewModel();
-            viewModel.TrainingPrograms = CreateTrainingSelections(GetEligibleTrainingPrograms(id));
+            var allPrograms = new TrainingAssignViewModel();
+            viewModel.TrainingPrograms = CreateTrainingSelections(GetAllPrograms());
+            allPrograms.TrainingPrograms = CreateTrainingSelections(GetEligibleTrainingPrograms(id));
             viewModel.EmployeeId = id;
+            allPrograms.EmployeeId = id;
             if (viewModel.TrainingPrograms.Count > 0)
             {
                 return View(viewModel);
             }
-            else return RedirectToAction(nameof(Details), new { id = id });
+            else return View(allPrograms);
 
         }
 
@@ -303,10 +306,7 @@ namespace Bangazon_Workforce_Management.Controllers
                                         JOIN EmployeeTraining et ON e.Id = et.EmployeeId 
                                         JOIN TrainingProgram tp ON et.TrainingProgramId = tp.Id 
                                         WHERE CURRENT_TIMESTAMP < tp.StartDate AND e.Id != @id
-                                        
-                                        SELECT COUNT(Id) AS AttendeeCount
-                                        FROM EmployeeTraining
-                                        GROUP BY TrainingProgramId
+
                                         ";
 
                             
@@ -344,6 +344,36 @@ namespace Bangazon_Workforce_Management.Controllers
                 Text = prog.Name,
                 Value = prog.Id.ToString()
             }).ToList();
+        }
+
+        private List<TrainingProgram> GetAllPrograms()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, Name, StartDate, EndDate, MaxAttendees FROM TrainingProgram";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+                    while (reader.Read())
+                    {
+                        trainingPrograms.Add(new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        });
+                    }
+
+                    reader.Close();
+
+                    return trainingPrograms;
+                }
+            }
         }
     }
 }

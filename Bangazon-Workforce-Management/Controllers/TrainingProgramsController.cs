@@ -152,7 +152,8 @@ namespace Bangazon_Workforce_Management.Controllers
                                 @startDate,
                                 @endDate,
                                 @maxAttendees
-                            )
+                            
+                            
                         ";
 
                         cmd.Parameters.AddWithValue("@name", trainingProgram.Name);
