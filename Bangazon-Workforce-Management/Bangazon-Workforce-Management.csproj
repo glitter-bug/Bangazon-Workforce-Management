@@ -16,11 +16,8 @@
     <Folder Include="Views\Customers\" />
     <Folder Include="Views\ComputerEmployees\" />
     <Folder Include="Views\ProductTypes\" />
-<<<<<<< HEAD
     <Folder Include="Views\Departments\" />
-=======
     <Folder Include="Views\Computers\" />
->>>>>>> master
   </ItemGroup>
 
 </Project>
