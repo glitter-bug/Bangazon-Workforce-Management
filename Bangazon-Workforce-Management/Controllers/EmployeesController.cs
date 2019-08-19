@@ -228,7 +228,7 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
-        // Get: Employee/1/AssignTraining
+        // GET: Employee/Assign/2
         public async Task<ActionResult> Assign(int id)
         {
             var viewModel = new TrainingAssignViewModel();
@@ -237,10 +237,14 @@ namespace Bangazon_Workforce_Management.Controllers
             if (viewModel.TrainingPrograms.Count > 0)
             {
                 return View(viewModel);
-            };
+            }
+            else return RedirectToAction(nameof(Details), new { id = id });
 
         }
 
+
+
+        // POST: Employee/Assign/2
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Assign(int id, EmployeeTraining assign)
@@ -255,9 +259,10 @@ namespace Bangazon_Workforce_Management.Controllers
                     cmd.Parameters.AddWithValue("@employeeId", id);
                     cmd.Parameters.AddWithValue("@trainingProgramId", assign.TrainingProgramId);
 
-                    await cmd.ExecuteNonQueryAsync();
+                    cmd.ExecuteNonQuery();
                 }
             }
+            return RedirectToAction(nameof(Details), new { id = id });
         }
         private List<Department> GetAllDepartments()
         {
@@ -292,23 +297,20 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT tp.Name, tp.StartDate, tp.EndDate, e.Id, tp.Id, tp.MaxAttendees 
+                    cmd.CommandText = @"SELECT tp.Name AS [Name], tp.StartDate AS StartDate, tp.EndDate AS StartDate, e.Id, tp.Id AS Id, tp.MaxAttendees AS MaxAttendees 
                                         FROM Employee e 
                                         JOIN EmployeeTraining et ON e.Id = et.EmployeeId 
                                         JOIN TrainingProgram tp ON et.TrainingProgramId = tp.Id 
-                                        WHERE CURRENT_TIMESTAMP < tp.StartDate AND e.Id != @id
+                                        WHERE CURRENT_TIMESTAMP < tp.StartDate AND e.Id != @id";
 
-                                        SELECT COUNT(Id) AS 'TrainingProgramCount', TrainingProgramId
-                                        FROM EmployeeTraining
-                                        GROUP BY TrainingProgramId";
+                            
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
-                        if ((reader.GetOrdinal("TrainingProgramCount")) != (reader.GetOrdinal("tp.MaxAttendess")))
-                        {
+                        
                             trainingPrograms.Add(new TrainingProgram
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("tp.Id")),
@@ -318,8 +320,9 @@ namespace Bangazon_Workforce_Management.Controllers
                                 MaxAttendees = reader.GetInt32(reader.GetOrdinal("tp.MaxAttendees"))
 
                             });
-                        }
+                        
                     }
+                    return trainingPrograms;
 
 
                 }
