@@ -330,9 +330,7 @@ namespace Bangazon_Workforce_Management.Controllers
                             IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"))
                         });
                     }
-
                     reader.Close();
-
                     return employees;
                 }
             }
