@@ -61,7 +61,6 @@ namespace Bangazon_Workforce_Management.Controllers
 
             return View(trainingPrograms);
         }
-
         // GET: TrainingPrograms/Details/5
         public ActionResult Details(int id)
         {
