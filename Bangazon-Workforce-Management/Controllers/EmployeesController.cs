@@ -234,8 +234,8 @@ namespace Bangazon_Workforce_Management.Controllers
         {
             var viewModel = new TrainingAssignViewModel();
             var allPrograms = new TrainingAssignViewModel();
-            viewModel.TrainingPrograms = CreateTrainingSelections(GetAllPrograms());
-            allPrograms.TrainingPrograms = CreateTrainingSelections(GetEligibleTrainingPrograms(id));
+            allPrograms.TrainingPrograms = CreateTrainingSelections(GetAllPrograms());
+            viewModel.TrainingPrograms = CreateTrainingSelections(GetEligibleTrainingPrograms(id));
             viewModel.EmployeeId = id;
             allPrograms.EmployeeId = id;
             if (viewModel.TrainingPrograms.Count > 0)
