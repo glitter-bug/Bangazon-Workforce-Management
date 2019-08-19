@@ -23,50 +23,31 @@
         <dd>
             @Html.DisplayFor(model => model.Budget)
         </dd>
+        <dt>
+            Employees: 
+            <br/>
+        </dt>
        
 
         @foreach (var item in Model.Employees)
         {
-            if (item.FirstName != null)
+            if (item.FullName != null)
             {
-                <dt>
-                    @Html.DisplayNameFor(model => item.FirstName)
-                </dt>
+                
                 <dd>
-                    @Html.DisplayFor(model => item.FirstName)
+                    @Html.DisplayFor(model => item.FullName)
                 </dd>
 
             }
 
             else
             {
-                <dt>
-                    @Html.DisplayNameFor(model => item.FirstName)
-                </dt>
+              
                 <dd>
-                    @Html.DisplayFor(model => item.FirstName)
+                    @Html.DisplayFor(model => item.FullName)
                 </dd>
             }
-            if (item.LastName != null)
-            {
-                <dt>
-                    @Html.DisplayNameFor(model => item.LastName)
-                </dt>
-                <dd>
-                    @Html.DisplayFor(model => item.LastName)
-                </dd>
-
-            }
-
-            else
-            {
-                <dt>
-                    @Html.DisplayNameFor(model => item.LastName)
-                </dt>
-                <dd>
-                    @Html.DisplayFor(model => item.LastName)
-                </dd>
-            }
+            
         }
     </dl>
 </div>
