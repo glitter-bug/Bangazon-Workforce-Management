@@ -96,11 +96,13 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
+                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, 
+                                               e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
                                         FROM Computer c
                                         LEFT JOIN ComputerEmployee ce on ce.ComputerId = @id
                                         LEFT JOIN Employee e on ce.EmployeeId = e.Id
                                         WHERE c.Id = @id";
+
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -283,11 +285,13 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
+                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, 
+                                               e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
                                         FROM Computer c
                                         LEFT JOIN ComputerEmployee ce on ce.ComputerId = @id
                                         LEFT JOIN Employee e on ce.EmployeeId = e.Id
                                         WHERE c.Id = @id";
+
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
