@@ -242,7 +242,10 @@ namespace Bangazon_Workforce_Management.Controllers
             {
                 return View(viewModel);
             }
-            else return View(allPrograms);
+            else
+            {
+                return View(allPrograms);
+            }
 
         }
 
