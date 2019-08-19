@@ -167,13 +167,11 @@ namespace Bangazon_Workforce_Management.Controllers
                     {
                         cmd.CommandText = @"
                              INSERT INTO Computer (
-                                PurchaseDate, 
-                                DecomissionDate, 
+                                PurchaseDate,  
                                 Make,
                                 Manufacturer
                             ) VALUES (
                                 @purchaseDate,
-                                @decomissionDate,
                                 @make,
                                 @manufacturer
                             );
@@ -190,7 +188,7 @@ namespace Bangazon_Workforce_Management.Controllers
                         ";
 
                         cmd.Parameters.AddWithValue("@purchaseDate", computer.PurchaseDate);
-                        cmd.Parameters.AddWithValue("@decomissionDate", computer.DecomissionDate);
+                        //cmd.Parameters.AddWithValue("@decomissionDate", computer.DecomissionDate);                     
                         cmd.Parameters.AddWithValue("@make", computer.Make);
                         cmd.Parameters.AddWithValue("@manufacturer", computer.Manufacturer);
                         cmd.Parameters.AddWithValue("@employeeId", computer.EmployeeId);
