@@ -39,8 +39,10 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer
-                        FROM Computer
+                        SELECT c.Id, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, ce.EmployeeId AS CEEmployeeId, e.Id AS EmployeeId, e.FirstName, e.LastName, e.DepartmentId
+                        FROM Computer c
+                        LEFT JOIN ComputerEmployee ce ON ce.ComputerId = c.Id
+                        LEFT JOIN Employee e ON e.Id = ce.EmployeeId
                         ORDER BY Id
                     ";
 
@@ -53,7 +55,7 @@ namespace Bangazon_Workforce_Management.Controllers
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
                         };
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
@@ -62,6 +64,21 @@ namespace Bangazon_Workforce_Management.Controllers
                         else
                         {
                             computer.DecomissionDate = null;
+                        };
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                        {
+                            Employee employee = new Employee
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                            };
+                            computer.Employee = employee;
+                        }
+                        else
+                        {
+                            computer.Employee = null;
                         };
                         computers.Add(computer);
                     }
@@ -74,30 +91,29 @@ namespace Bangazon_Workforce_Management.Controllers
         // GET: Computers/Details/5
         public ActionResult Details(int id)
         {
-            Computer computer = null;
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"
-                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer
-                        FROM Computer
-                        WHERE Id = @id
-                    ";
+                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, 
+                                               e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
+                                        FROM Computer c
+                                        LEFT JOIN ComputerEmployee ce on ce.ComputerId = @id
+                                        LEFT JOIN Employee e on ce.EmployeeId = e.Id
+                                        WHERE c.Id = @id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
+                    Employee employee = new Employee();
+                    Computer computer = new Computer();
                     if (reader.Read())
                     {
-                        computer = new Computer()
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                            Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                        };
+                        computer.Id = reader.GetInt32(reader.GetOrdinal("Id"));
+                        computer.Make = reader.GetString(reader.GetOrdinal("Make"));
+                        computer.Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"));
+                        computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
                             computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
@@ -106,10 +122,17 @@ namespace Bangazon_Workforce_Management.Controllers
                         {
                             computer.DecomissionDate = null;
                         };
-                    }
+                        employee.Id = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+                        employee.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                        employee.LastName = reader.GetString(reader.GetOrdinal("LastName"));
+                        employee.IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"));
+                        employee.DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"));
+                        computer.Employee = employee;
+                    };
+                    reader.Close();
+                    return View(computer);
                 }
             }
-            return View(computer);
         }
 
         // GET: Computers/Create
@@ -149,22 +172,31 @@ namespace Bangazon_Workforce_Management.Controllers
                     {
                         cmd.CommandText = @"
                              INSERT INTO Computer (
-                                PurchaseDate, 
-                                DecomissionDate, 
+                                PurchaseDate,  
                                 Make,
                                 Manufacturer
                             ) VALUES (
                                 @purchaseDate,
-                                @decomissionDate,
                                 @make,
                                 @manufacturer
-                            )
+                            );
+
+                            INSERT INTO ComputerEmployee (
+                                ComputerId,
+                                EmployeeId,
+                                AssignDate
+                            ) VALUES (
+                                (SELECT MAX(Id) FROM Computer),
+                                @employeeId,
+                                @assignDate
+                            )                           
                         ";
 
-                        cmd.Parameters.AddWithValue("@purchaseDate", computer.PurchaseDate);
-                        cmd.Parameters.AddWithValue("@decomissionDate", computer.DecomissionDate);
+                        cmd.Parameters.AddWithValue("@purchaseDate", computer.PurchaseDate);                     
                         cmd.Parameters.AddWithValue("@make", computer.Make);
                         cmd.Parameters.AddWithValue("@manufacturer", computer.Manufacturer);
+                        cmd.Parameters.AddWithValue("@employeeId", computer.EmployeeId);
+                        cmd.Parameters.AddWithValue("@assignDate", DateTime.Now);
 
                         cmd.ExecuteNonQuery();
                     }
@@ -178,51 +210,42 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
-        //// GET: Computers/Edit/5
-        //public ActionResult Edit(int id)
-        //{
-        //    return View();
-        //}
+        // GET: Computers/Delete/5
+        public ActionResult Delete(int id)
+        {
+            var computer = GetOneComputer(id);
+            return View(computer);
+        }
 
-        //// POST: Computers/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        // TODO: Add update logic here
+        // POST: Computers/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, IFormCollection collection)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
 
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM ComputerEmployee
+                                            WHERE ComputerId = @id;
 
-        //// GET: Computers/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
-
-        //// POST: Computers/Delete/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Delete(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        // TODO: Add delete logic here
-
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+                                            DELETE FROM Computer
+                                            WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
 
         private List<Employee> GetAllEmployees()
         {
@@ -250,6 +273,52 @@ namespace Bangazon_Workforce_Management.Controllers
                     reader.Close();
 
                     return employees;
+                }
+            }
+        }
+
+        private Computer GetOneComputer(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, 
+                                               e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
+                                        FROM Computer c
+                                        LEFT JOIN ComputerEmployee ce on ce.ComputerId = @id
+                                        LEFT JOIN Employee e on ce.EmployeeId = e.Id
+                                        WHERE c.Id = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Employee employee = new Employee();
+                    Computer computer = new Computer();
+                    if (reader.Read())
+                    {
+                        computer.Id = reader.GetInt32(reader.GetOrdinal("Id"));
+                        computer.Make = reader.GetString(reader.GetOrdinal("Make"));
+                        computer.Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"));
+                        computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+                        else
+                        {
+                            computer.DecomissionDate = null;
+                        };
+                        employee.Id = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+                        employee.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                        employee.LastName = reader.GetString(reader.GetOrdinal("LastName"));
+                        employee.IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"));
+                        employee.DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"));
+                        computer.Employee = employee;
+                    };
+                    reader.Close();
+                    return computer;
                 }
             }
         }

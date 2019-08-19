@@ -9,6 +9,8 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+<label>Search Computers (Make or Manufacturer):  </label>
+<input placeholder="Sony"/>
 <table class="table">
     <thead>
         <tr>
@@ -27,7 +29,10 @@
             <th>
                 @Html.DisplayNameFor(model => model.Manufacturer)
             </th>
-            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.Employee.FullName)
+
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -49,9 +54,11 @@
                 @Html.DisplayFor(modelItem => item.Manufacturer)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.DisplayFor(modelItem => item.Employee.FullName)
+            </td>
+            <td>
                 @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                @Html.ActionLink("Delete", "Delete", new { id=item.Id })
             </td>
         </tr>
 }
