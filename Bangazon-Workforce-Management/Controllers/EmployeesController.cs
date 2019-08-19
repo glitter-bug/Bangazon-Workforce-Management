@@ -237,7 +237,6 @@ namespace Bangazon_Workforce_Management.Controllers
                         cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
                         cmd.Parameters.AddWithValue("@computerId", model.Employee.ComputerId);
                         cmd.Parameters.AddWithValue("@employeeId", id);
-
                         cmd.Parameters.AddWithValue("@id", id);
 
                         cmd.ExecuteNonQuery();
@@ -247,7 +246,7 @@ namespace Bangazon_Workforce_Management.Controllers
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return View();
             }
@@ -261,9 +260,14 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, FirstName, LastName, IsSuperVisor, DepartmentId
-                        FROM Employee
-                        WHERE Id = @id
+                    SELECT e.Id, e.FirstName, e.LastName, e.IsSuperVisor, e.DepartmentId, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
+                        tp.[Name] AS TrainingProgram, tp.StartDate, tp.EndDate, tp.MaxAttendees, d.Budget, c.Id AS ComputerId
+                    FROM Department d 
+                    LEFT JOIN Employee e ON d.Id = e.DepartmentId
+                    LEFT JOIN ComputerEmployee ce ON e.Id = ce.EmployeeId
+                    LEFT JOIN Computer c ON ce.ComputerId = c.Id
+                    LEFT JOIN TrainingProgram tp ON c.Id = tp.Id
+                    WHERE e.Id = @id
                     ";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -277,8 +281,16 @@ namespace Bangazon_Workforce_Management.Controllers
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                         };
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                        {
+                            employee.ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId"));
+                        }
+                        else
+                        {
+                            employee.ComputerId = 0;
+                        }
                     }
                 }
                 return employee;
@@ -321,7 +333,7 @@ namespace Bangazon_Workforce_Management.Controllers
                     cmd.CommandText = @"SELECT c.Id, c.Make, ce.UnassignDate 
                                         FROM Computer c 
                                         INNER JOIN ComputerEmployee ce ON ce.ComputerId = c.Id 
-                                        WHERE ce.UnassignDate IS NOT NULL";
+                                        WHERE ce.UnassignDate IS  NULL";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Computer> computers = new List<Computer>();
