@@ -73,7 +73,7 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                     SELECT e.FirstName, e.LastName, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
+                     SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
                         tp.[Name] AS TrainingProgram, tp.StartDate, tp.EndDate, tp.MaxAttendees, d.Budget
                     FROM Department d 
                     LEFT JOIN Employee e ON d.Id = e.DepartmentId
@@ -88,8 +88,9 @@ namespace Bangazon_Workforce_Management.Controllers
                     {
                         employee = new Employee()
                         {
+                            Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
                         };
 
                         employee.Computer = new Computer();
@@ -247,7 +248,7 @@ namespace Bangazon_Workforce_Management.Controllers
         // POST: Employee/Assign/2
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Assign(int id, EmployeeTraining assign)
+        public IActionResult Assign(int id, TrainingAssignViewModel assign)
         {
             using (SqlConnection conn = Connection)
             {
@@ -297,11 +298,16 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT tp.Name AS [Name], tp.StartDate AS StartDate, tp.EndDate AS EndDate, e.Id, tp.Id AS Id, tp.MaxAttendees AS MaxAttendees 
+                    cmd.CommandText = @"SELECT tp.Name AS [Name], tp.StartDate AS StartDate, tp.EndDate AS EndDate, e.Id AS EmployeeId, tp.Id AS TrainingProgramId, tp.MaxAttendees AS MaxAttendees 
                                         FROM Employee e 
                                         JOIN EmployeeTraining et ON e.Id = et.EmployeeId 
                                         JOIN TrainingProgram tp ON et.TrainingProgramId = tp.Id 
-                                        WHERE CURRENT_TIMESTAMP < tp.StartDate AND e.Id != @id";
+                                        WHERE CURRENT_TIMESTAMP < tp.StartDate AND e.Id != @id
+                                        
+                                        SELECT COUNT(Id) AS AttendeeCount
+                                        FROM EmployeeTraining
+                                        GROUP BY TrainingProgramId
+                                        ";
 
                             
                     cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -310,16 +316,19 @@ namespace Bangazon_Workforce_Management.Controllers
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
+                        if (!trainingPrograms.Any(tp => tp.Id == reader.GetInt32(reader.GetOrdinal("TrainingProgramId")))) {
 
-                        trainingPrograms.Add(new TrainingProgram
+                            trainingPrograms.Add(new TrainingProgram
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Id = reader.GetInt32(reader.GetOrdinal("TrainingProgramId")),
                                 Name = reader.GetString(reader.GetOrdinal("Name")),
                                 StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
                                 EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
                                 MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
 
                             });
+                        }
+
                         
                     }
                     return trainingPrograms;
