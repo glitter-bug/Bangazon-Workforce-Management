@@ -10,7 +10,6 @@ namespace Bangazon_Workforce_Management.Models.ViewModels
 
         public ComputerEmployee ComputerEmployee { get; set; }
         public List<SelectListItem> Departments { get; set; }
-
         public List<SelectListItem> Computers { get; set; }
         public EmployeeEditViewModel() { }
 
@@ -39,7 +38,7 @@ namespace Bangazon_Workforce_Management.Models.ViewModels
                 .ToList();
             Computers.Insert(0, new SelectListItem
             {
-                Text = "Choose Computer...",
+                Text = "Assign Computer...",
                 Value = "0"
             });
         }

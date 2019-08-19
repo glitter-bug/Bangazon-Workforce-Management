@@ -4,29 +4,29 @@
     ViewData["Title"] = "Edit";
 }
 
-<h2>Edit</h2>
+<h2>Employees</h2>
 
-<h4>EmployeeEditViewModel</h4>
+<h4>Update an Employee</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             @*<div asp-validation-summary="ModelOnly" class="text-danger"></div>*@
-            @*<div class="form-group">
+            <div class="form-group">
                 <label asp-for="Employee.FirstName" class="control-label"></label>
-                <input asp-for="Employee.FirstName" class="form-control" />
+                <input asp-for="Employee.FirstName" class="hidden" />
                 <span asp-validation-for="Employee.FirstName" class="text-danger"></span>
-            </div>*@
+            </div>
             <div class="form-group">
                 <label asp-for="Employee.LastName" class="control-label"></label>
                 <input asp-for="Employee.LastName" class="form-control" />
                 <span asp-validation-for="Employee.LastName" class="text-danger"></span>
             </div>
-            @*<div class="form-group">
+            <div class="form-group">
                 <label asp-for="Employee.IsSuperVisor" class="control-label"></label>
-                <input asp-for="Employee.IsSuperVisor" class="form-control" />
+                <input asp-for="Employee.IsSuperVisor" class="hidden" />
                 <span asp-validation-for="Employee.IsSuperVisor" class="text-danger"></span>
-            </div>*@
+            </div>
             <div class="form-group">
                 <label asp-for="Departments" class="control-label"></label>
                 <select asp-for="Employee.DepartmentId" asp-items="@Model.Departments"></select>

@@ -220,23 +220,24 @@ namespace Bangazon_Workforce_Management.Controllers
                         cmd.CommandText = @"
                                             UPDATE ComputerEmployee
                                             SET
-                                                ComputerId = @computerId,
-                                                UnassignDate = CURRENT_TIMESTAMP,
+                                                UnassignDate = CURRENT_TIMESTAMP
                                             Where EmployeeId = @id;
 
-                                            INSERT INTO ComputerEmployee
-                                            WHERE ComputerId = @computerId, EmployeeId = @employeeId, 
+                                            INSERT INTO ComputerEmployee (ComputerId, EmployeeId, AssignDate)
+                                            VALUES (@computerId, @employeeId, CURRENT_TIMESTAMP)
 
                                             UPDATE Employee
                                             SET
                                                 FirstName = @firstName,
                                                 LastName = @lastName,
-                                                IsSuperVisor = @isSuperVisor,
                                                 DepartmentId = @departmentId
                                             WHERE Id = @id";
+                        cmd.Parameters.AddWithValue("@firstName", model.Employee.FirstName);
                         cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
                         cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
-                        cmd.Parameters.AddWithValue("@computerId", model.ComputerEmployee.ComputerId);
+                        cmd.Parameters.AddWithValue("@computerId", model.Employee.ComputerId);
+                        cmd.Parameters.AddWithValue("@employeeId", id);
+
                         cmd.Parameters.AddWithValue("@id", id);
 
                         cmd.ExecuteNonQuery();
@@ -246,7 +247,7 @@ namespace Bangazon_Workforce_Management.Controllers
                     }
                 }
             }
-            catch
+            catch(Exception ex)
             {
                 return View();
             }
@@ -317,7 +318,10 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, Make FROM Computer";
+                    cmd.CommandText = @"SELECT c.Id, c.Make, ce.UnassignDate 
+                                        FROM Computer c 
+                                        INNER JOIN ComputerEmployee ce ON ce.ComputerId = c.Id 
+                                        WHERE ce.UnassignDate IS NOT NULL";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Computer> computers = new List<Computer>();
@@ -334,6 +338,7 @@ namespace Bangazon_Workforce_Management.Controllers
 
                     return computers;
                 }
+
             }
         }
     }
