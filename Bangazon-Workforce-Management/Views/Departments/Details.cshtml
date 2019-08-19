@@ -7,10 +7,7 @@
 <h2>Details</h2>
 
 <div>
-    <h4>
-
-            @Html.DisplayFor(model => model.Name)
-    </h4>
+    <h4>@Html.DisplayFor(model => model.Name)</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -19,13 +16,58 @@
         <dd>
             @Html.DisplayFor(model => model.Id)
         </dd>
+       
         <dt>
             @Html.DisplayNameFor(model => model.Budget)
         </dt>
         <dd>
             @Html.DisplayFor(model => model.Budget)
         </dd>
-        
+       
+
+        @foreach (var item in Model.Employees)
+        {
+            if (item.FirstName != null)
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => item.FirstName)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => item.FirstName)
+                </dd>
+
+            }
+
+            else
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => item.FirstName)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => item.FirstName)
+                </dd>
+            }
+            if (item.LastName != null)
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => item.LastName)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => item.LastName)
+                </dd>
+
+            }
+
+            else
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => item.LastName)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => item.LastName)
+                </dd>
+            }
+        }
     </dl>
 </div>
 <div>
