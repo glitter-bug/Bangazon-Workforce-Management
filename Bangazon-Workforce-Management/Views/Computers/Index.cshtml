@@ -9,8 +9,12 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<label>Search Computers (Make or Manufacturer):  </label>
-<input placeholder="Sony"/>
+<form asp-controller="Computers" asp-action="SearchComputers">
+    <p>
+         Search Computers (Make/Manufacturer): <input type="text" name="SearchString">
+        <input type="submit" value="Search" />
+    </p>
+</form>
 <table class="table">
     <thead>
         <tr>
@@ -30,7 +34,7 @@
                 @Html.DisplayNameFor(model => model.Manufacturer)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Employee.FullName)
+                Assigned Employee
 
             </th>
         </tr>
