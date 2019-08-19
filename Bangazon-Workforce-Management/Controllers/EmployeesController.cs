@@ -188,43 +188,94 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
+        // GET: Students/Edit/5
+        public ActionResult Edit(int id)
+        {
+            //use GetSingleEmployee to get the Student you want to edit
+            Employee employee = GetSingleEmployee(id);
+            //Use GetAllDepartments to get a list of cohorts
+            List<Department> departments = GetAllDepartments();
+            //Use GetAllComputers to get a list of cohorts
+            List<Computer> computers = GetAllComputers();
+            //pass Employee, the List of Departments and the lits of Com[puters into an instance of the EmployeeEditViewModel
+            var viewModel = new EmployeeEditViewModel(employee, departments, computers);
+            //pass the instance of the viewModel into View()
+            return View(viewModel);
+        }
+
+
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, EmployeeEditViewModel model)
+
         {
             try
             {
                 // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                                            UPDATE ComputerEmployee
+                                            SET
+                                                ComputerId = @computerId
+                                            Where Id = @id;
+                                            UPDATE Employee
+                                            SET
+                                                LastName = @lastName,
+                                                DepartmentId = @departmentId
+                                            WHERE Id = @id";
+                        cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                        cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                        cmd.Parameters.AddWithValue("@computerId", model.ComputerEmployee.ComputerId);
 
-                return RedirectToAction(nameof(Index));
+                        cmd.Parameters.AddWithValue("@id", id);
+
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+
+                    }
+                }
             }
             catch
             {
                 return View();
             }
         }
-
-        // GET: Employees/Delete/5
-        public ActionResult Delete(int id)
+        private Employee GetSingleEmployee(int id)
         {
-            return View();
-        }
-
-        // POST: Employees/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
+            using (SqlConnection conn = Connection)
             {
-                // TODO: Add delete logic here
+                Employee employee = null;
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, FirstName, LastName, IsSuperVisor, DepartmentId
+                        FROM Employee
+                        WHERE Id = @id
+                    ";
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        employee = new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                        };
+                    }
+                }
+                return employee;
             }
         }
         private List<Department> GetAllDepartments()
@@ -250,6 +301,33 @@ namespace Bangazon_Workforce_Management.Controllers
                     reader.Close();
 
                     return departments;
+                }
+            }
+        }
+
+        private List<Computer> GetAllComputers()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, Make FROM Computer";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Computer> computers = new List<Computer>();
+                    while (reader.Read())
+                    {
+                        computers.Add(new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                        });
+                    }
+
+                    reader.Close();
+
+                    return computers;
                 }
             }
         }
