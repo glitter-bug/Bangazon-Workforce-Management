@@ -170,7 +170,6 @@ namespace Bangazon_Workforce_Management.Controllers
                                 @departmentId
                             )
                         ";
-
                         cmd.Parameters.AddWithValue("@firstName", employee.FirstName);
                         cmd.Parameters.AddWithValue("@lastName", employee.LastName);
                         cmd.Parameters.AddWithValue("@isSuperVisor", employee.IsSuperVisor);
@@ -221,18 +220,23 @@ namespace Bangazon_Workforce_Management.Controllers
                         cmd.CommandText = @"
                                             UPDATE ComputerEmployee
                                             SET
-                                                ComputerId = @computerId
+                                                ComputerId = @computerId,
+                                                UnassignDate = CURRENT_TIMESTAMP,
                                             Where EmployeeId = @id;
+
+                                            INSERT INTO ComputerEmployee
+                                            WHERE ComputerId = @computerId, EmployeeId = @employeeId, 
 
                                             UPDATE Employee
                                             SET
+                                                FirstName = @firstName,
                                                 LastName = @lastName,
+                                                IsSuperVisor = @isSuperVisor,
                                                 DepartmentId = @departmentId
                                             WHERE Id = @id";
                         cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
                         cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
                         cmd.Parameters.AddWithValue("@computerId", model.ComputerEmployee.ComputerId);
-
                         cmd.Parameters.AddWithValue("@id", id);
 
                         cmd.ExecuteNonQuery();
