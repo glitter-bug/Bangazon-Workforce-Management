@@ -1,11 +1,12 @@
 ﻿@model Bangazon_Workforce_Management.Models.Computer
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Delete";
 }
 
-<h2>Details</h2>
+<h2>Delete</h2>
 
+<h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Computer</h4>
     <hr />
@@ -24,7 +25,6 @@
         </dd>
         @if (Model.DecomissionDate != null)
         {
-
             <dt>
                 @Html.DisplayNameFor(model => model.DecomissionDate)
             </dt>
@@ -45,19 +45,21 @@
             @Html.DisplayFor(model => model.Manufacturer)
         </dd>
         <dt>
-            Assigned Employee: 
+            Assigned Employee:
         </dt>
         <dd>
             @Html.DisplayFor(model => model.Employee.FullName)
         </dd>
         <dt>
-            Assigned Employee Id: 
+            Assigned Employee Id:
         </dt>
         <dd>
             @Html.DisplayFor(model => model.Employee.Id)
         </dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Index">Back to List</a>
+    
+    <form asp-action="Delete">
+        <input type="submit" value="Delete" class="btn btn-default" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
 </div>
