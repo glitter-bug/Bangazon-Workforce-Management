@@ -222,7 +222,8 @@ namespace Bangazon_Workforce_Management.Controllers
                                             UPDATE ComputerEmployee
                                             SET
                                                 ComputerId = @computerId
-                                            Where Id = @id;
+                                            Where EmployeeId = @id;
+
                                             UPDATE Employee
                                             SET
                                                 LastName = @lastName,
