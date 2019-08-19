@@ -96,11 +96,11 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT c.Id AS ComputerId, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
+                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
                                         FROM Computer c
                                         LEFT JOIN ComputerEmployee ce on ce.ComputerId = @id
                                         LEFT JOIN Employee e on ce.EmployeeId = e.Id
-                                        WHERE ComputerId = @id";
+                                        WHERE c.Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -108,16 +108,10 @@ namespace Bangazon_Workforce_Management.Controllers
                     Computer computer = new Computer();
                     if (reader.Read())
                     {
-                        employee.Id = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
-                        employee.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
-                        employee.LastName = reader.GetString(reader.GetOrdinal("LastName"));
-                        employee.IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"));
-                        employee.DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"));
-                        computer.Id = reader.GetInt32(reader.GetOrdinal("ComputerId"));
+                        computer.Id = reader.GetInt32(reader.GetOrdinal("Id"));
                         computer.Make = reader.GetString(reader.GetOrdinal("Make"));
                         computer.Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"));
                         computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
-                        computer.Employee = employee;
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
                             computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
@@ -126,6 +120,12 @@ namespace Bangazon_Workforce_Management.Controllers
                         {
                             computer.DecomissionDate = null;
                         };
+                        employee.Id = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+                        employee.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                        employee.LastName = reader.GetString(reader.GetOrdinal("LastName"));
+                        employee.IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"));
+                        employee.DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"));
+                        computer.Employee = employee;
                     };
                     reader.Close();
                     return View(computer);
@@ -283,11 +283,11 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT c.Id AS ComputerId, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
+                    cmd.CommandText = @"SELECT c.Id, c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, e.FirstName, e.LastName, e.Id AS EmployeeId, e.IsSuperVisor, e.DepartmentId
                                         FROM Computer c
                                         LEFT JOIN ComputerEmployee ce on ce.ComputerId = @id
                                         LEFT JOIN Employee e on ce.EmployeeId = e.Id
-                                        WHERE ComputerId = @id";
+                                        WHERE c.Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -295,16 +295,10 @@ namespace Bangazon_Workforce_Management.Controllers
                     Computer computer = new Computer();
                     if (reader.Read())
                     {
-                        employee.Id = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
-                        employee.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
-                        employee.LastName = reader.GetString(reader.GetOrdinal("LastName"));
-                        employee.IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"));
-                        employee.DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"));
-                        computer.Id = reader.GetInt32(reader.GetOrdinal("ComputerId"));
+                        computer.Id = reader.GetInt32(reader.GetOrdinal("Id"));
                         computer.Make = reader.GetString(reader.GetOrdinal("Make"));
                         computer.Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"));
                         computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
-                        computer.Employee = employee;
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
                             computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
@@ -313,6 +307,12 @@ namespace Bangazon_Workforce_Management.Controllers
                         {
                             computer.DecomissionDate = null;
                         };
+                        employee.Id = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+                        employee.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                        employee.LastName = reader.GetString(reader.GetOrdinal("LastName"));
+                        employee.IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"));
+                        employee.DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"));
+                        computer.Employee = employee;
                     };
                     reader.Close();
                     return computer;
