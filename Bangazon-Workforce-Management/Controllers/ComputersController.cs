@@ -247,6 +247,67 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
+        public ActionResult SearchComputers(IFormCollection search)
+        {
+            if (string.IsNullOrEmpty(search["SearchString"][0]))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            List<Computer> computers = new List<Computer>();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT c.Id AS ComputerId, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, 
+                               e.Id AS EmployeeId, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor
+                        FROM Computer c
+                        LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
+                        LEFT JOIN Employee e ON e.Id = ce.EmployeeId
+                        WHERE c.Make LIKE '%' + @search + '%'
+                        OR c.Manufacturer LIKE '%' + @search + '%'";
+
+                    cmd.Parameters.AddWithValue("@search", search["SearchString"][0]);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Computer computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"))
+                        };
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                        {
+                            computer.EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+
+                            var employee = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                            };
+                            computer.Employee = employee;
+                        }
+                        computers.Add(computer);
+                    }
+                    reader.Close();
+                }
+            }
+            return View(computers);
+        }
+
         private List<Employee> GetAllEmployees()
         {
             using (SqlConnection conn = Connection)
@@ -269,9 +330,7 @@ namespace Bangazon_Workforce_Management.Controllers
                             IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"))
                         });
                     }
-
                     reader.Close();
-
                     return employees;
                 }
             }
