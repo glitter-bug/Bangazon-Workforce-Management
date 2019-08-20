@@ -10,6 +10,8 @@ namespace Bangazon_Workforce_Management.Models
     {
         public int Id { get; set; }
         [Required]
+
+        [Display(Name = "Department")]
         public string Name { get; set; }
         [Required]
         public int Budget { get; set; }

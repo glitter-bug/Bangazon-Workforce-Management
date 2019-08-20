@@ -12,7 +12,7 @@ namespace Bangazon_Workforce_Management.Models
         [Required]
         public DateTime PurchaseDate { get; set; }
         public DateTime? DecomissionDate { get; set; }
-
+        [Display(Name = "Computer Make")]
         public string Make { get; set; }
         [Required]
         public string Manufacturer { get; set; }

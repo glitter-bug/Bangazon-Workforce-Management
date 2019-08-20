@@ -4,7 +4,7 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Details</h2>
+<h2>Departments</h2>
 
 <div>
     <h4>@Html.DisplayFor(model => model.Name)</h4>
@@ -16,7 +16,7 @@
         <dd>
             @Html.DisplayFor(model => model.Id)
         </dd>
-       
+
         <dt>
             @Html.DisplayNameFor(model => model.Budget)
         </dt>
@@ -24,16 +24,16 @@
             @Html.DisplayFor(model => model.Budget)
         </dd>
         <dt>
-            Employees: 
-            <br/>
+            Employees:
+            <br />
         </dt>
-       
+
 
         @foreach (var item in Model.Employees)
         {
             if (item.FullName != null)
             {
-                
+
                 <dd>
                     @Html.DisplayFor(model => item.FullName)
                 </dd>
@@ -42,16 +42,16 @@
 
             else
             {
-              
+
                 <dd>
                     @Html.DisplayFor(model => item.FullName)
                 </dd>
             }
-            
+
         }
     </dl>
 </div>
 <div>
-    @Html.ActionLink("Edit", "Edit", new {  id = Model.Id  }) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>
 </div>
