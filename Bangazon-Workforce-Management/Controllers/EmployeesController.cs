@@ -246,6 +246,7 @@ namespace Bangazon_Workforce_Management.Controllers
             {
                 return View(allPrograms);
             }
+            return View(allPrograms);
 
         }
 
@@ -308,18 +309,19 @@ namespace Bangazon_Workforce_Management.Controllers
                                         FROM Employee e 
                                         JOIN EmployeeTraining et ON e.Id = et.EmployeeId 
                                         JOIN TrainingProgram tp ON et.TrainingProgramId = tp.Id 
-                                        WHERE CURRENT_TIMESTAMP < tp.StartDate AND e.Id != @id
-
+                                        WHERE CURRENT_TIMESTAMP < tp.StartDate AND @id != EmployeeId
+                                        
                                         ";
 
-                            
+
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
-                        if (!trainingPrograms.Any(tp => tp.Id == reader.GetInt32(reader.GetOrdinal("TrainingProgramId")))) {
+                        if (!trainingPrograms.Any(tp => tp.Id == reader.GetInt32(reader.GetOrdinal("TrainingProgramId"))))
+                        {
 
                             trainingPrograms.Add(new TrainingProgram
                             {
@@ -332,7 +334,7 @@ namespace Bangazon_Workforce_Management.Controllers
                             });
                         }
 
-                        
+
                     }
                     return trainingPrograms;
 
@@ -356,13 +358,13 @@ namespace Bangazon_Workforce_Management.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, Name, StartDate, EndDate, MaxAttendees FROM TrainingProgram";
+                    cmd.CommandText = "SELECT Id, Name, StartDate, EndDate, MaxAttendees FROM TrainingProgram WHERE CURRENT_TIMESTAMP < StartDate";
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+                    List<TrainingProgram> allPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
-                        trainingPrograms.Add(new TrainingProgram
+                        allPrograms.Add(new TrainingProgram
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
@@ -374,7 +376,7 @@ namespace Bangazon_Workforce_Management.Controllers
 
                     reader.Close();
 
-                    return trainingPrograms;
+                    return allPrograms;
                 }
             }
         }

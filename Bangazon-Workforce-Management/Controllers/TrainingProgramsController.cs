@@ -158,7 +158,7 @@ namespace Bangazon_Workforce_Management.Controllers
                     {
                         cmd.CommandText = @"
                             INSERT INTO TrainingProgram (
-                                Name,
+                                [Name],
                                 StartDate,
                                 EndDate,
                                 MaxAttendees
@@ -167,8 +167,7 @@ namespace Bangazon_Workforce_Management.Controllers
                                 @startDate,
                                 @endDate,
                                 @maxAttendees
-                            
-                            
+                                )             
                         ";
 
                         cmd.Parameters.AddWithValue("@name", trainingProgram.Name);
