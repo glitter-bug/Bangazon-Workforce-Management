@@ -11,6 +11,8 @@ namespace Bangazon_Workforce_Management.Models
     {
         public int Id { get; set; }
         [Required]
+        [Display(Name = "Training Program")]
+
         public string Name { get; set; }
         [Required]
         public DateTime StartDate { get; set; }
