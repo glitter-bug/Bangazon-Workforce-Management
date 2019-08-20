@@ -189,27 +189,121 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
+        // GET: Employees/Edit/5
+        public ActionResult Edit(int id)
+        {
+            // new up a viewmodel for edit
+            var viewModel = new EmployeeEditViewModel();
+            // create a method that gets a single employee, assign it to a variable
+            var employee = GetSingleEmployee(id);
+            // create a method that gets a single employee, assign it to a variable 
+            var oneComputer = GetSingleComputer(id);
+            // create a method that gets all departments, assign it to a variable 
+            var departments = GetAllDepartments();
+            // create a method that gets all departments, assign it to a variable 
+            var computers = GetAllComputers();
+
+            // create  new SelectListItem instances for departments to create a drop down menu. Assign it to a variable
+            var departmentSelects = departments
+                //for every department put into the SelectList, Assign the default text of the drop down, Assign the value of each SelectListItem
+                .Select(department => new SelectListItem
+                {
+                    Text = department.Name,
+                    Value = department.Id.ToString()
+                })
+                .ToList();
+
+            departmentSelects.Insert(0, new SelectListItem
+            {
+                Text = "Choose department...",
+                Value = "0"
+            });
+
+            var computerSelects = computers
+                .Select(computer => new SelectListItem
+                {
+                    Text = computer.Make,
+                    Value = computer.Id.ToString()
+                })
+                .ToList();
+            // If a single computer exists (GetSingleComputer(id), Insert a SelectListItem for a computer at index 0. Assign the default text of the drop down, assign the value of each SelectListItem
+            if (oneComputer != null)
+            {
+                computerSelects.Insert(0, new SelectListItem
+                {
+                    Text = "Choose computer...",
+                    Value = oneComputer.Id.ToString()
+                });
+            }
+            else
+            {
+
+            }
+            // Assign methods stored in variables to the viewModel
+            viewModel.Computer = oneComputer;
+            viewModel.Employee = employee;
+            viewModel.Departments = departmentSelects;
+            viewModel.Computers = computerSelects;
+
+            return View(viewModel);
+        }
+
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, EmployeeEditViewModel model)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        if (model.Computer != null)
+                        {
+                            cmd.CommandText = @"
+                                            UPDATE Employee 
+                                            SET LastName = @lastName,
+                                                DepartmentId = @departmentId
+                                            WHERE Id = @id;
+
+                                            UPDATE ComputerEmployee
+                                                Set EmployeeId = @id,
+                                                ComputerId = @computerId,
+                                                AssignDate = GETDATE(),
+                                                UnassignDate = null
+                                            WHERE EmployeeId = @id
+                                                ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                            cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
+                        }
+                        else
+                        {
+                            cmd.CommandText = @"
+                                            UPDATE Employee 
+                                            SET LastName = @lastName,
+                                                DepartmentId = @departmentId
+                                            WHERE Id = @id
+                                              ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                        }
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
             }
-        }
-
-        // GET: Employees/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
         }
 
         // POST: Employees/Delete/5
