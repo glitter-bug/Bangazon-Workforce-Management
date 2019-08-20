@@ -26,21 +26,36 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
         // GET: TrainingPrograms
-        public ActionResult Index()
+        public ActionResult Index(bool isPast)
         {
             var trainingPrograms = new List<TrainingProgram>();
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
+
+                    
                 {
-                    cmd.CommandText = @"
+                    if (isPast == true)
+                    {
+                        cmd.CommandText = @"
+                        SELECT  Id, Name, StartDate, EndDate,MaxAttendees
+                        FROM TrainingProgram 
+                        WHERE CURRENT_TIMESTAMP > StartDate
+                         
+                        
+                    ";
+                    }
+                    else if (isPast == false)
+                    {
+                        cmd.CommandText = @"
                         SELECT  Id, Name, StartDate, EndDate,MaxAttendees
                         FROM TrainingProgram 
                         WHERE CURRENT_TIMESTAMP < StartDate
                          
                         
                     ";
+                    }
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
