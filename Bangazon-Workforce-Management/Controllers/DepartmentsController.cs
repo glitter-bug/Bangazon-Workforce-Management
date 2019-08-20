@@ -68,9 +68,9 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                         SELECT d.Id as DepartmentId, d.Name, d.Budget, e.FirstName, e.LastName
-                        FROM Employee e
-                        JOIN Department d ON e.DepartmentId = d.Id
+                        SELECT d.Id as DepartmentId, d.Name, d.Budget, e.FirstName, e.LastName, e.Id as EmployeeId, e.DepartmentId AS EmployeeDepartmentId, e.IsSuperVisor
+                        FROM Department d
+                        LEFT JOIN Employee e ON e.DepartmentId = d.Id
                         WHERE d.Id = @id
                     ";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -84,15 +84,25 @@ namespace Bangazon_Workforce_Management.Controllers
                                 Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                 Name = reader.GetString(reader.GetOrdinal("Name")),
                                 Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
-
-
+                               
                             };
                         }
-                            department.Employees.Add(new Employee()
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))                        
                         {
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
-                        });
+                            department.Employees.Add(new Employee()
+
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("EmployeeDepartmentId"))
+                            });
+                        }
+                        else
+                        {
+                            department.Employees = new List<Employee>();
+                        }
                     }
                 }
             }
