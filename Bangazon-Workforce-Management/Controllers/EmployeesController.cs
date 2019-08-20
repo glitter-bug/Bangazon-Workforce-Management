@@ -187,64 +187,116 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
-        // GET: Students/Edit/5
+        // GET: Employees/Edit/5
         public ActionResult Edit(int id)
         {
-            //use GetSingleEmployee to get the Student you want to edit
-            Employee employee = GetSingleEmployee(id);
-            //Use GetAllDepartments to get a list of cohorts
-            List<Department> departments = GetAllDepartments();
-            //Use GetAllComputers to get a list of cohorts
-            List<Computer> computers = GetAllComputers();
-            //pass Employee, the List of Departments and the lits of Com[puters into an instance of the EmployeeEditViewModel
-            var viewModel = new EmployeeEditViewModel(employee, departments, computers);
-            //pass the instance of the viewModel into View()
+            // new up a viewmodel for edit
+            var viewModel = new EmployeeEditViewModel();
+            // create a method that gets a single employee, assign it to a variable
+            var employee = GetSingleEmployee(id);
+            // create a method that gets a single employee, assign it to a variable 
+            var computerVar = GetSingleComputer(id);
+            // create a method that gets all departments, assign it to a variable 
+            var departments = GetAllDepartments();
+            // create a method that gets all departments, assign it to a variable 
+            var computers = GetAllComputers();
+
+            // create  new SelectListItem instances for departments to create a drop down menu. Assign it to a variable
+            var departmentSelects = departments
+                //for every department put into the SelectList, Assign the default text of the drop down, Assign the value of each SelectListItem
+                .Select(department => new SelectListItem
+                {
+                    Text = department.Name,
+                    Value = department.Id.ToString()
+                })
+                .ToList();
+
+            departmentSelects.Insert(0, new SelectListItem
+            {
+                Text = "Choose department...",
+                Value = "0"
+            });
+
+            var computerSelects = computers
+                .Select(computer => new SelectListItem
+                {
+                    Text = computer.Make,
+                    Value = computer.Id.ToString()
+                })
+                .ToList();
+            // If a single computer exists (GetSingleComputer(id), Insert a SelectListItem for a computer at index 0. Assign the default text of the drop down, assign the value of each SelectListItem
+            if (computerVar != null)
+            {
+                computerSelects.Insert(0, new SelectListItem
+                {
+                    Text = "Choose computer...",
+                    Value = computerVar.Id.ToString()
+                });
+            }
+            else
+            {
+
+            }
+            // Assign methods stored in variables to the viewModel
+            viewModel.Computer = computerVar;
+            viewModel.Employee = employee;
+            viewModel.Departments = departmentSelects;
+            viewModel.Computers = computerSelects;
+
             return View(viewModel);
         }
-
 
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, EmployeeEditViewModel model)
-
         {
             try
             {
-                // TODO: Add update logic here
                 using (SqlConnection conn = Connection)
                 {
                     conn.Open();
+
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"
-                                            UPDATE ComputerEmployee
-                                            SET
-                                                UnassignDate = CURRENT_TIMESTAMP
-                                            Where EmployeeId = @id;
-
-                                            INSERT INTO ComputerEmployee (ComputerId, EmployeeId, AssignDate)
-                                            VALUES (@computerId, @employeeId, CURRENT_TIMESTAMP)
-
-                                            UPDATE Employee
-                                            SET
-                                                FirstName = @firstName,
-                                                LastName = @lastName,
+                        if (model.Computer != null)
+                        {
+                            cmd.CommandText = @"
+                                            UPDATE Employee 
+                                            SET LastName = @lastName,
                                                 DepartmentId = @departmentId
-                                            WHERE Id = @id";
-                        cmd.Parameters.AddWithValue("@firstName", model.Employee.FirstName);
-                        cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
-                        cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
-                        cmd.Parameters.AddWithValue("@computerId", model.Employee.ComputerId);
-                        cmd.Parameters.AddWithValue("@employeeId", id);
-                        cmd.Parameters.AddWithValue("@id", id);
+                                            WHERE Id = @id;
+
+                                            UPDATE ComputerEmployee
+                                                Set EmployeeId = @id,
+                                                ComputerId = @computerId,
+                                                AssignDate = GETDATE(),
+                                                UnassignDate = null
+                                            WHERE EmployeeId = @id
+                                                ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                            cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
+                        }
+                        else
+                        {
+                            cmd.CommandText = @"
+                                            UPDATE Employee 
+                                            SET LastName = @lastName,
+                                                DepartmentId = @departmentId
+                                            WHERE Id = @id
+                                              ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                        }
 
                         cmd.ExecuteNonQuery();
-
-                        return RedirectToAction(nameof(Index));
-
                     }
                 }
+
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
@@ -296,6 +348,44 @@ namespace Bangazon_Workforce_Management.Controllers
                 return employee;
             }
         }
+        private Computer GetSingleComputer(int id)
+        {
+            Computer computer = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT c.Id, c.DecomissionDate, c.Make, c.Manufacturer, c.PurchaseDate
+                        FROM ComputerEmployee ce
+                        LEFT JOIN Computer c ON c.Id = ce.ComputerId 
+                        WHERE ce.EmployeeId = @id
+                    ";
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+                    }
+                    reader.Close();
+                }
+            }
+            return computer;
+        }
         private List<Department> GetAllDepartments()
         {
             using (SqlConnection conn = Connection)
@@ -325,33 +415,48 @@ namespace Bangazon_Workforce_Management.Controllers
 
         private List<Computer> GetAllComputers()
         {
+            List<Computer> computers = new List<Computer>();
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT c.Id, c.Make, ce.UnassignDate 
-                                        FROM Computer c 
-                                        INNER JOIN ComputerEmployee ce ON ce.ComputerId = c.Id 
-                                        WHERE ce.UnassignDate IS  NULL";
+                    cmd.CommandText = @"
+                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
+                            FROM Computer
+                            WHERE Id NOT IN (
+                                SELECT ComputerId
+                                FROM ComputerEmployee
+                            )
+                    ";
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<Computer> computers = new List<Computer>();
                     while (reader.Read())
                     {
-                        computers.Add(new Computer
+                        Computer computer = new Computer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
-                        });
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        computers.Add(computer);
+
                     }
-
                     reader.Close();
-
-                    return computers;
                 }
-
             }
+            return (computers);
         }
     }
 }
+
+
+    
+
