@@ -73,11 +73,12 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                     SELECT e.FirstName, e.LastName, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
+                     SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, d.Id AS DepartmentId, d.Name AS DepartmentName, c.Id AS ComputerId, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
                         tp.[Name] AS TrainingProgram, tp.StartDate, tp.EndDate, tp.MaxAttendees, d.Budget
                     FROM Department d 
                     LEFT JOIN Employee e ON d.Id = e.DepartmentId
-                    LEFT JOIN Computer c ON e.Id = c.Id
+                    LEFT JOIN ComputerEmployee ce ON ce.EmployeeId = e.Id
+                    LEFT JOIN Computer c ON ce.ComputerId = c.Id
                     LEFT JOIN TrainingProgram tp ON c.Id = tp.Id
                     WHERE e.Id = @id
                     ";
@@ -95,10 +96,13 @@ namespace Bangazon_Workforce_Management.Controllers
                         employee.Computer = new Computer();
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerMake")))
                         {
+                            Computer computer = new Computer();
                             employee.Computer.Make = reader.GetString(reader.GetOrdinal("ComputerMake"));
                             employee.Computer.Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"));
                             employee.Computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
-                        };
+                        
+                        }
+
 
                         employee.Department = new Department()
                         {
@@ -195,7 +199,7 @@ namespace Bangazon_Workforce_Management.Controllers
             // create a method that gets a single employee, assign it to a variable
             var employee = GetSingleEmployee(id);
             // create a method that gets a single employee, assign it to a variable 
-            var computerVar = GetSingleComputer(id);
+            var oneComputer = GetSingleComputer(id);
             // create a method that gets all departments, assign it to a variable 
             var departments = GetAllDepartments();
             // create a method that gets all departments, assign it to a variable 
@@ -225,12 +229,12 @@ namespace Bangazon_Workforce_Management.Controllers
                 })
                 .ToList();
             // If a single computer exists (GetSingleComputer(id), Insert a SelectListItem for a computer at index 0. Assign the default text of the drop down, assign the value of each SelectListItem
-            if (computerVar != null)
+            if (oneComputer != null)
             {
                 computerSelects.Insert(0, new SelectListItem
                 {
                     Text = "Choose computer...",
-                    Value = computerVar.Id.ToString()
+                    Value = oneComputer.Id.ToString()
                 });
             }
             else
@@ -238,7 +242,7 @@ namespace Bangazon_Workforce_Management.Controllers
 
             }
             // Assign methods stored in variables to the viewModel
-            viewModel.Computer = computerVar;
+            viewModel.Computer = oneComputer;
             viewModel.Employee = employee;
             viewModel.Departments = departmentSelects;
             viewModel.Computers = computerSelects;
@@ -422,13 +426,9 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
-                            FROM Computer
-                            WHERE Id NOT IN (
-                                SELECT ComputerId
-                                FROM ComputerEmployee
-                            )
-                    ";
+                                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
+                                        FROM Computer
+                                      ";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
@@ -458,5 +458,5 @@ namespace Bangazon_Workforce_Management.Controllers
 }
 
 
-    
+
 
