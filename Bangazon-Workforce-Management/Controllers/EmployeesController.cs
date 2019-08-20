@@ -73,16 +73,11 @@ namespace Bangazon_Workforce_Management.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-<<<<<<< HEAD
                      SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
-=======
-                     SELECT e.Id AS EmployeeId, e.FirstName, e.LastName, d.Id AS DepartmentId, d.Name AS DepartmentName, c.Id AS ComputerId, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
->>>>>>> master
                         tp.[Name] AS TrainingProgram, tp.StartDate, tp.EndDate, tp.MaxAttendees, d.Budget
                     FROM Department d 
                     LEFT JOIN Employee e ON d.Id = e.DepartmentId
-                    LEFT JOIN ComputerEmployee ce ON ce.EmployeeId = e.Id
-                    LEFT JOIN Computer c ON ce.ComputerId = c.Id
+                    LEFT JOIN Computer c ON e.Id = c.Id
                     LEFT JOIN TrainingProgram tp ON c.Id = tp.Id
                     WHERE e.Id = @id
                     ";
@@ -101,13 +96,10 @@ namespace Bangazon_Workforce_Management.Controllers
                         employee.Computer = new Computer();
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerMake")))
                         {
-                            Computer computer = new Computer();
                             employee.Computer.Make = reader.GetString(reader.GetOrdinal("ComputerMake"));
                             employee.Computer.Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"));
                             employee.Computer.PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate"));
-                        
-                        }
-
+                        };
 
                         employee.Department = new Department()
                         {
@@ -179,6 +171,7 @@ namespace Bangazon_Workforce_Management.Controllers
                                 @departmentId
                             )
                         ";
+
                         cmd.Parameters.AddWithValue("@firstName", employee.FirstName);
                         cmd.Parameters.AddWithValue("@lastName", employee.LastName);
                         cmd.Parameters.AddWithValue("@isSuperVisor", employee.IsSuperVisor);
@@ -196,123 +189,73 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
-        // GET: Employees/Edit/5
-        public ActionResult Edit(int id)
-        {
-            // new up a viewmodel for edit
-            var viewModel = new EmployeeEditViewModel();
-            // create a method that gets a single employee, assign it to a variable
-            var employee = GetSingleEmployee(id);
-            // create a method that gets a single employee, assign it to a variable 
-            var oneComputer = GetSingleComputer(id);
-            // create a method that gets all departments, assign it to a variable 
-            var departments = GetAllDepartments();
-            // create a method that gets all departments, assign it to a variable 
-            var computers = GetAllComputers();
-
-            // create  new SelectListItem instances for departments to create a drop down menu. Assign it to a variable
-            var departmentSelects = departments
-                //for every department put into the SelectList, Assign the default text of the drop down, Assign the value of each SelectListItem
-                .Select(department => new SelectListItem
-                {
-                    Text = department.Name,
-                    Value = department.Id.ToString()
-                })
-                .ToList();
-
-            departmentSelects.Insert(0, new SelectListItem
-            {
-                Text = "Choose department...",
-                Value = "0"
-            });
-
-            var computerSelects = computers
-                .Select(computer => new SelectListItem
-                {
-                    Text = computer.Make,
-                    Value = computer.Id.ToString()
-                })
-                .ToList();
-            // If a single computer exists (GetSingleComputer(id), Insert a SelectListItem for a computer at index 0. Assign the default text of the drop down, assign the value of each SelectListItem
-            if (oneComputer != null)
-            {
-                computerSelects.Insert(0, new SelectListItem
-                {
-                    Text = "Choose computer...",
-                    Value = oneComputer.Id.ToString()
-                });
-            }
-            else
-            {
-
-            }
-            // Assign methods stored in variables to the viewModel
-            viewModel.Computer = oneComputer;
-            viewModel.Employee = employee;
-            viewModel.Departments = departmentSelects;
-            viewModel.Computers = computerSelects;
-
-            return View(viewModel);
-        }
-
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, EmployeeEditViewModel model)
+        public ActionResult Edit(int id, IFormCollection collection)
         {
             try
             {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        if (model.Computer != null)
-                        {
-                            cmd.CommandText = @"
-                                            UPDATE Employee 
-                                            SET LastName = @lastName,
-                                                DepartmentId = @departmentId
-                                            WHERE Id = @id;
-
-                                            UPDATE ComputerEmployee
-                                                Set EmployeeId = @id,
-                                                ComputerId = @computerId,
-                                                AssignDate = GETDATE(),
-                                                UnassignDate = null
-                                            WHERE EmployeeId = @id
-                                                ";
-                            cmd.Parameters.AddWithValue("@id", id);
-                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
-                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
-                            cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
-                        }
-                        else
-                        {
-                            cmd.CommandText = @"
-                                            UPDATE Employee 
-                                            SET LastName = @lastName,
-                                                DepartmentId = @departmentId
-                                            WHERE Id = @id
-                                              ";
-                            cmd.Parameters.AddWithValue("@id", id);
-                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
-                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
-                        }
-
-                        cmd.ExecuteNonQuery();
-                    }
-                }
+                // TODO: Add update logic here
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch
             {
                 return View();
             }
         }
-<<<<<<< HEAD
+
+        // GET: Employees/Delete/5
+        public ActionResult Delete(int id)
+        {
+            return View();
+        }
+
+        // POST: Employees/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, IFormCollection collection)
+        {
+            try
+            {
+                // TODO: Add delete logic here
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+
+        private List<Department> GetAllDepartments()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, Name FROM Department";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Department> departments = new List<Department>();
+                    while (reader.Read())
+                    {
+                        departments.Add(new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                        });
+                    }
+
+                    reader.Close();
+
+                    return departments;
+                }
+            }
+        }
 
         // GET: Employee/Assign/2
         public ActionResult Assign(int id)
@@ -342,62 +285,11 @@ namespace Bangazon_Workforce_Management.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Assign(int id, TrainingAssignViewModel assign)
         {
-=======
-        private Employee GetSingleEmployee(int id)
-        {
-            using (SqlConnection conn = Connection)
-            {
-                Employee employee = null;
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"
-                    SELECT e.Id, e.FirstName, e.LastName, e.IsSuperVisor, e.DepartmentId, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
-                        tp.[Name] AS TrainingProgram, tp.StartDate, tp.EndDate, tp.MaxAttendees, d.Budget, c.Id AS ComputerId
-                    FROM Department d 
-                    LEFT JOIN Employee e ON d.Id = e.DepartmentId
-                    LEFT JOIN ComputerEmployee ce ON e.Id = ce.EmployeeId
-                    LEFT JOIN Computer c ON ce.ComputerId = c.Id
-                    LEFT JOIN TrainingProgram tp ON c.Id = tp.Id
-                    WHERE e.Id = @id
-                    ";
-
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        employee = new Employee()
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                        };
-                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
-                        {
-                            employee.ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId"));
-                        }
-                        else
-                        {
-                            employee.ComputerId = 0;
-                        }
-                    }
-                }
-                return employee;
-            }
-        }
-        private Computer GetSingleComputer(int id)
-        {
-            Computer computer = null;
->>>>>>> master
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-<<<<<<< HEAD
                     cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
                                         VALUES (@employeeId, @trainingProgramId)";
                     cmd.Parameters.AddWithValue("@employeeId", id);
@@ -407,79 +299,14 @@ namespace Bangazon_Workforce_Management.Controllers
                 }
             }
             return RedirectToAction(nameof(Details), new { id = id });
-=======
-                    cmd.CommandText = @"
-                        SELECT c.Id, c.DecomissionDate, c.Make, c.Manufacturer, c.PurchaseDate
-                        FROM ComputerEmployee ce
-                        LEFT JOIN Computer c ON c.Id = ce.ComputerId 
-                        WHERE ce.EmployeeId = @id
-                    ";
-                    cmd.Parameters.AddWithValue("@id", id);
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        computer = new Computer
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                            Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                        };
-
-                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
-                        {
-                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
-                        }
-                    }
-                    reader.Close();
-                }
-            }
-            return computer;
->>>>>>> master
         }
-        private List<Department> GetAllDepartments()
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT Id, Name FROM Department";
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    List<Department> departments = new List<Department>();
-                    while (reader.Read())
-                    {
-                        departments.Add(new Department
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                        });
-                    }
-
-                    reader.Close();
-
-                    return departments;
-                }
-            }
-        }
-<<<<<<< HEAD
         private List<TrainingProgram> GetEligibleTrainingPrograms(int id)
         {
-=======
-
-        private List<Computer> GetAllComputers()
-        {
-            List<Computer> computers = new List<Computer>();
->>>>>>> master
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-<<<<<<< HEAD
                     cmd.CommandText = @"SELECT tp.Name AS [Name], tp.StartDate AS StartDate, tp.EndDate AS EndDate, e.Id AS EmployeeId, tp.Id AS TrainingProgramId, tp.MaxAttendees AS MaxAttendees 
                                         FROM Employee e 
                                         JOIN EmployeeTraining et ON e.Id = et.EmployeeId 
@@ -554,36 +381,6 @@ namespace Bangazon_Workforce_Management.Controllers
                     return allPrograms;
                 }
             }
-=======
-                    cmd.CommandText = @"
-                                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
-                                        FROM Computer
-                                      ";
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        Computer computer = new Computer
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                            Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                        };
-
-                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
-                        {
-                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
-                        }
-
-                        computers.Add(computer);
-
-                    }
-                    reader.Close();
-                }
-            }
-            return (computers);
->>>>>>> master
         }
     }
 }
