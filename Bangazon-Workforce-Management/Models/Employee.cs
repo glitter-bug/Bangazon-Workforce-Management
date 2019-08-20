@@ -16,8 +16,11 @@ namespace Bangazon_Workforce_Management.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
         [Required]
+        [Range(1,100,ErrorMessage = "Select a Department")]
         [Display(Name = "Department Id")]
         public int DepartmentId { get; set; }
+        [Range(1, 100, ErrorMessage = "Select a Computer")]
+
         [Display(Name = "Computer Id")]
         public int ComputerId { get; set; }
         [Required]

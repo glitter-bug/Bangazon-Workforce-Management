@@ -20,17 +20,22 @@
             <div class="form-group">
                 <label asp-for="Departments" class="control-label"></label>
                 <select asp-for="Employee.DepartmentId" asp-items="@Model.Departments"></select>
+                <span asp-validation-for="Employee.DepartmentId" class="text-danger"></span>
+
             </div>
-            @if(Model.Computer != null)
-            { 
-            <div>
-                <p><strong>Computer Assigned:</strong> @Model.Computer.Manufacturer @Model.Computer.Make</p>
-            </div>
-            <div class="form-group">
-                <label asp-for="Computers" class="control-label">Assign new Computer</label>
-                <select asp-for="Computer.Id" asp-items="@Model.Computers"></select>
-            </div>
-            } else
+            @if (Model.Computer != null)
+            {
+                <div>
+                    <p><strong>Computer Assigned:</strong> @Model.Computer.Manufacturer @Model.Computer.Make</p>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Computers" class="control-label">Assign new Computer</label>
+                    <select asp-for="Computer.Id" asp-items="@Model.Computers"></select>
+                    <span asp-validation-for="Computer.Id" class="text-danger"></span>
+
+                </div>
+            }
+            else
             {
                 <p>No Computer Assigned</p>
             }
@@ -44,3 +49,8 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
