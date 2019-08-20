@@ -4,10 +4,10 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Details</h2>
+<h2>Employees</h2>
 
+<h4>Employee Details</h4>
 <div>
-    <h4>Employee</h4>
     <hr />
     <dl class="dl-horizontal">
 
@@ -50,15 +50,12 @@
                 </dd>
 
             }
-            else
-            {
-                
-            }
+
         }
 
     </dl>
 </div>
 <div>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @*@Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |*@
     <a asp-action="Index">Back to List</a>
 </div>
