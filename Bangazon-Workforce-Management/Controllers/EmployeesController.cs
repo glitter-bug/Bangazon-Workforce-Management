@@ -323,34 +323,6 @@ namespace Bangazon_Workforce_Management.Controllers
             }
         }
 
-
-        private List<Department> GetAllDepartments()
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT Id, Name FROM Department";
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    List<Department> departments = new List<Department>();
-                    while (reader.Read())
-                    {
-                        departments.Add(new Department
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                        });
-                    }
-
-                    reader.Close();
-
-                    return departments;
-                }
-            }
-        }
-
         // GET: Employee/Assign/2
         public ActionResult Assign(int id)
         {
@@ -475,6 +447,153 @@ namespace Bangazon_Workforce_Management.Controllers
                     return allPrograms;
                 }
             }
+        }
+        private Employee GetSingleEmployee(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                Employee employee = null;
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    SELECT e.Id, e.FirstName, e.LastName, e.IsSuperVisor, e.DepartmentId, d.Name AS DepartmentName, c.PurchaseDate, c.Make AS ComputerMake, c.Manufacturer As ComputerManufacturer,
+                        tp.[Name] AS TrainingProgram, tp.StartDate, tp.EndDate, tp.MaxAttendees, d.Budget, c.Id AS ComputerId
+                    FROM Department d 
+                    LEFT JOIN Employee e ON d.Id = e.DepartmentId
+                    LEFT JOIN ComputerEmployee ce ON e.Id = ce.EmployeeId
+                    LEFT JOIN Computer c ON ce.ComputerId = c.Id
+                    LEFT JOIN TrainingProgram tp ON c.Id = tp.Id
+                    WHERE e.Id = @id
+                    ";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        employee = new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                        };
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                        {
+                            employee.ComputerId = reader.GetInt32(reader.GetOrdinal("ComputerId"));
+                        }
+                        else
+                        {
+                            employee.ComputerId = 0;
+                        }
+                    }
+                }
+                return employee;
+            }
+        }
+        private Computer GetSingleComputer(int id)
+        {
+            Computer computer = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT c.Id, c.DecomissionDate, c.Make, c.Manufacturer, c.PurchaseDate
+                        FROM ComputerEmployee ce
+                        LEFT JOIN Computer c ON c.Id = ce.ComputerId 
+                        WHERE ce.EmployeeId = @id
+                    ";
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+                    }
+                    reader.Close();
+                }
+            }
+            return computer;
+        }
+        private List<Department> GetAllDepartments()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT Id, Name FROM Department";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Department> departments = new List<Department>();
+                    while (reader.Read())
+                    {
+                        departments.Add(new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                        });
+                    }
+
+                    reader.Close();
+
+                    return departments;
+                }
+            }
+        }
+
+        private List<Computer> GetAllComputers()
+        {
+            List<Computer> computers = new List<Computer>();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
+                                        FROM Computer
+                                      ";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Computer computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        computers.Add(computer);
+
+                    }
+                    reader.Close();
+                }
+            }
+            return (computers);
         }
     }
 }
